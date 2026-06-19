@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>130 миллиметров — Discord сервер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  /* ===========================================================
+     НАСТРОЙКА САЙТА
+     Все основные данные собраны в HTML ниже, под комментариями
+     ПРАВЬ ТУТ. Цвета/шрифты можно не трогать — всё подстроится.
+     =========================================================== */
+  :root{
+    --bg:        #07070C;
+    --bg-card:   #14141D;
+    --bg-card-h: #1A1A26;
+    --line:      #232330;
+    --line-soft: #1C1C28;
+    --text:      #EDEDF2;
+    --text-dim:  #8A8A99;
+    --accent:    #5865F2;
+    --accent-h:  #6F77F5;
+    --accent-glow: rgba(88,101,242,0.5);
+    --gold:      #F2C94C;
+    --pink:      #EB5FA8;
+    --online:    #3BA55D;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+    cursor:none;
+  }
+  @media (max-width:900px){ body{ cursor:auto; } }
+
+  h1,h2,h3{ font-family:'Sora', sans-serif; letter-spacing:-0.01em; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  img{ max-width:100%; display:block; }
+  ::selection{ background:var(--accent); color:#fff; }
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+  }
+
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 24px; position:relative; z-index:2; }
+
+  /* ---------- КАСТОМНЫЙ КУРСОР ---------- */
+  .cursor-dot, .cursor-ring{
+    position:fixed;
+    top:0; left:0;
+    pointer-events:none;
+    z-index:999;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .cursor-dot{
+    width:6px; height:6px;
+    background:var(--accent);
+    transition:opacity 0.2s;
+  }
+  .cursor-ring{
+    width:32px; height:32px;
+    border:1.5px solid rgba(88,101,242,0.5);
+    transition:width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .cursor-ring.hover{
+    width:54px; height:54px;
+    background:rgba(88,101,242,0.12);
+    border-color:var(--accent);
+  }
+  @media (max-width:900px){ .cursor-dot, .cursor-ring{ display:none; } }
+
+  /* ---------- АНИМИРОВАННЫЙ ФОН ---------- */
+  .bg-layer{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:0.35;
+    will-change:transform;
+  }
+  .blob-1{
+    width:600px; height:600px;
+    background:var(--accent);
+    top:-200px; left:-150px;
+    animation:float1 22s ease-in-out infinite;
+  }
+  .blob-2{
+    width:500px; height:500px;
+    background:var(--pink);
+    top:30%; right:-200px;
+    opacity:0.18;
+    animation:float2 26s ease-in-out infinite;
+  }
+  .blob-3{
+    width:450px; height:450px;
+    background:var(--gold);
+    bottom:-150px; left:20%;
+    opacity:0.12;
+    animation:float3 30s ease-in-out infinite;
+  }
+  @keyframes float1{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(80px,120px) scale(1.15); }
+  }
+  @keyframes float2{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(-100px,80px) scale(1.1); }
+  }
+  @keyframes float3{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(60px,-90px) scale(1.2); }
+  }
+
+  .grain{
+    position:fixed; inset:0; z-index:1;
+    background-image:radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:3px 3px;
+    pointer-events:none;
+  }
+
+  #particles{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+  }
+  .particle{
+    position:absolute;
+    width:3px; height:3px;
+    background:var(--accent);
+    border-radius:50%;
+    opacity:0.5;
+    animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    10%{ opacity:0.6; }
+    90%{ opacity:0.4; }
+    100%{ transform:translateY(-100vh) translateX(40px); opacity:0; }
+  }
+
+  /* ---------- ХЕДЕР ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(7,7,12,0.7);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Sora', sans-serif;
+    font-weight:700;
+    font-size:1.05rem;
+  }
+  .logo-icon{
+    width:32px; height:32px;
+    border-radius:9px;
+    background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.9rem;
+    flex-shrink:0;
+    box-shadow:0 0 20px var(--accent-glow);
+  }
+  .nav-links{ display:flex; gap:28px; font-size:0.9rem; color:var(--text-dim); }
+  .nav-links a{ transition:color 0.2s; position:relative; }
+  .nav-links a:hover{ color:var(--text); }
+  .nav-cta{
+    font-size:0.85rem; font-weight:600;
+    padding:10px 20px;
+    background:var(--accent);
+    border-radius:8px;
+    transition:all 0.2s;
+    white-space:nowrap;
+    box-shadow:0 0 0 rgba(88,101,242,0.5);
+  }
+  .nav-cta:hover{ background:var(--accent-h); box-shadow:0 0 24px var(--accent-glow); }
+
+  @media (max-width:760px){ .nav-links{ display:none; } }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; z-index:1;
+    padding:120px 0 70px;
+    text-align:center;
+  }
+  .online-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:8px 16px;
+    border-radius:30px;
+    font-size:0.85rem;
+    color:var(--text-dim);
+    margin-bottom:28px;
+  }
+  .online-dot{
+    width:8px; height:8px;
+    border-radius:50%;
+    background:var(--online);
+    position:relative;
+  }
+  .online-dot::after{
+    content:'';
+    position:absolute;
+    inset:-4px;
+    border-radius:50%;
+    border:1.5px solid var(--online);
+    animation:pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{ transform:scale(0.6); opacity:0.9; }
+    100%{ transform:scale(1.8); opacity:0; }
+  }
+  .online-pill strong{ color:var(--text); font-weight:600; }
+
+  .hero h1{
+    font-size:clamp(2.8rem, 8vw, 5.4rem);
+    font-weight:800;
+    line-height:1.0;
+    margin-bottom:22px;
+    letter-spacing:-0.02em;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(90deg, var(--accent), var(--pink) 50%, var(--gold));
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:gradflow 6s ease infinite;
+  }
+  @keyframes gradflow{
+    0%,100%{ background-position:0% 50%; }
+    50%{ background-position:100% 50%; }
+  }
+
+  .hero p.lead{
+    color:var(--text-dim);
+    font-size:1.12rem;
+    max-width:540px;
+    margin:0 auto 36px;
+  }
+
+  .hero-actions{
+    display:flex; justify-content:center; gap:14px; flex-wrap:wrap;
+  }
+  .btn{
+    font-family:'Sora', sans-serif;
+    font-weight:600;
+    font-size:0.98rem;
+    padding:16px 32px;
+    border-radius:10px;
+    transition:all 0.25s;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    position:relative;
+    overflow:hidden;
+  }
+  .btn-primary{ background:var(--accent); color:#fff; }
+  .btn-primary:hover{ background:var(--accent-h); transform:translateY(-3px) scale(1.02); box-shadow:0 16px 40px -10px var(--accent-glow); }
+  .btn-ghost{ border:1px solid var(--line); color:var(--text); }
+  .btn-ghost:hover{ border-color:var(--accent); color:var(--accent); transform:translateY(-3px); }
+
+  /* ---------- СТАТИСТИКА (со счётчиками) ---------- */
+  .stats-bar{
+    position:relative; z-index:1;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    margin-top:56px;
+  }
+  @media (max-width:700px){ .stats-bar{ grid-template-columns:repeat(2, 1fr); } }
+  .stat{
+    background:var(--bg-card);
+    padding:30px 20px;
+    text-align:center;
+    transition:background 0.3s;
+  }
+  .stat:hover{ background:var(--bg-card-h); }
+  .stat-num{
+    font-family:'Sora', sans-serif;
+    font-weight:800;
+    font-size:2rem;
+    color:var(--gold);
+    display:block;
+    margin-bottom:6px;
+  }
+  .stat-label{ color:var(--text-dim); font-size:0.85rem; }
+
+  /* ---------- СЕКЦИИ ОБЩЕЕ ---------- */
+  section{ position:relative; z-index:1; padding:100px 0; }
+  .section-head{ text-align:center; margin-bottom:54px; }
+  .section-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--accent);
+    text-transform:uppercase;
+  }
+  .section-head h2{ font-size:clamp(1.9rem, 4vw, 2.6rem); margin-top:12px; }
+  .section-head p{ color:var(--text-dim); max-width:480px; margin:14px auto 0; }
+
+  /* ---------- ФИШКИ СЕРВЕРА (с tilt-эффектом) ---------- */
+  .features-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:22px;
+  }
+  @media (max-width:860px){ .features-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:600px){ .features-grid{ grid-template-columns:1fr; } }
+
+  .feature-card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:28px 24px;
+    transition:border-color 0.25s, background 0.25s;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .feature-card:hover{ border-color:var(--accent); background:var(--bg-card-h); }
+  .feature-icon{
+    width:46px; height:46px;
+    border-radius:12px;
+    background:rgba(88,101,242,0.15);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:18px;
+    font-size:1.3rem;
+  }
+  .feature-card h3{ font-size:1.08rem; margin-bottom:8px; }
+  .feature-card p{ color:var(--text-dim); font-size:0.9rem; }
+
+  /* ---------- О СЕРВЕРЕ ---------- */
+  .about-block{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:50px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    align-items:center;
+  }
+  @media (max-width:800px){ .about-block{ grid-template-columns:1fr; padding:34px 26px; } }
+  .about-block p{ color:var(--text-dim); margin-bottom:16px; }
+  .about-block strong{ color:var(--text); font-weight:600; }
+
+  .tag-cloud{ display:flex; flex-wrap:wrap; gap:10px; }
+  .channel-tag{
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    padding:10px 16px;
+    border-radius:10px;
+    font-size:0.88rem;
+    transition:border-color 0.2s, transform 0.2s;
+  }
+  .channel-tag:hover{ border-color:var(--accent); transform:translateY(-2px); }
+  .channel-tag .hash{ color:var(--text-dim); }
+
+  /* ---------- ПРАВИЛА КАК "УРОВНИ" ---------- */
+  .rules-list{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-width:720px;
+    margin:0 auto;
+  }
+  .rule-row{
+    display:flex;
+    align-items:flex-start;
+    gap:20px;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px 26px;
+    transition:border-color 0.25s, transform 0.25s;
+  }
+  .rule-row:hover{ border-color:var(--accent); transform:translateX(6px); }
+  .rule-level{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    font-size:0.85rem;
+    color:var(--bg);
+    background:var(--gold);
+    min-width:48px;
+    height:48px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .rule-text h3{ font-size:1.02rem; margin-bottom:5px; }
+  .rule-text p{ color:var(--text-dim); font-size:0.88rem; }
+
+  /* ---------- КОМАНДА ---------- */
+  .team-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:20px;
+  }
+  @media (max-width:860px){ .team-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:500px){ .team-grid{ grid-template-columns:1fr; } }
+  .team-card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 20px;
+    text-align:center;
+    transition:transform 0.25s, border-color 0.25s;
+  }
+  .team-card:hover{ transform:translateY(-5px); border-color:var(--accent); }
+  .team-avatar{
+    width:64px; height:64px;
+    border-radius:50%;
+    margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem;
+    font-weight:700;
+    font-family:'Sora', sans-serif;
+    color:#fff;
+  }
+  .team-card h3{ font-size:1rem; margin-bottom:4px; }
+  .team-role{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.74rem;
+    color:var(--accent);
+    text-transform:uppercase;
+  }
+
+  /* ---------- ОТЗЫВЫ ---------- */
+  .reviews-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  @media (max-width:860px){ .reviews-grid{ grid-template-columns:1fr; } }
+  .review-card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:24px;
+    transition:transform 0.25s, border-color 0.25s;
+  }
+  .review-card:hover{ transform:translateY(-4px); border-color:var(--accent); }
+  .review-card p{ color:var(--text); font-size:0.95rem; margin-bottom:18px; }
+  .review-author{ display:flex; align-items:center; gap:10px; }
+  .review-avatar{
+    width:34px; height:34px;
+    border-radius:50%;
+    background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.85rem;
+    font-weight:600;
+    flex-shrink:0;
+  }
+  .review-name{ font-size:0.88rem; font-weight:600; }
+  .review-role{ font-size:0.78rem; color:var(--text-dim); }
+
+  /* ---------- FAQ ---------- */
+  .faq-list{ max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+  .faq-item{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    transition:border-color 0.2s;
+  }
+  .faq-item:hover{ border-color:var(--line-soft); }
+  .faq-q{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 24px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:0.98rem;
+    user-select:none;
+  }
+  .faq-arrow{
+    transition:transform 0.3s;
+    color:var(--accent);
+    flex-shrink:0;
+    margin-left:16px;
+  }
+  .faq-item.open .faq-arrow{ transform:rotate(180deg); }
+  .faq-a{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.35s ease;
+  }
+  .faq-a-inner{
+    padding:0 24px 20px;
+    color:var(--text-dim);
+    font-size:0.92rem;
+  }
+
+  /* ---------- ФИНАЛЬНЫЙ CTA ---------- */
+  .cta-block{
+    text-align:center;
+    background:linear-gradient(160deg, rgba(88,101,242,0.2), rgba(20,20,29,0.4));
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:74px 40px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cta-block h2{ font-size:clamp(2.1rem, 5vw, 3rem); margin-bottom:16px; }
+  .cta-block p{ color:var(--text-dim); max-width:440px; margin:0 auto 32px; }
+
+  footer{
+    text-align:center;
+    padding:34px 0;
+    color:var(--text-dim);
+    font-size:0.82rem;
+    border-top:1px solid var(--line);
+    font-family:'JetBrains Mono', monospace;
+    position:relative; z-index:1;
+  }
+
+  .reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+</style>
+</head>
+<body>
+
+<div class="cursor-dot"></div>
+<div class="cursor-ring"></div>
+
+<div class="bg-layer">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+<div class="grain"></div>
+<div id="particles"></div>
+
+<header>
+  <nav class="nav">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      130мм
+    </div>
+    <div class="nav-links">
+      <a href="#about">о сервере</a>
+      <a href="#features">фишки</a>
+      <a href="#rules">правила</a>
+      <a href="#team">команда</a>
+      <a href="#faq">вопросы</a>
+    </div>
+    <a href="#join" class="nav-cta">Войти на сервер</a>
+  </nav>
+</header>
+
+<!-- ====================== HERO ====================== -->
+<section class="hero">
+  <div class="wrap">
+
+    <!-- ПРАВЬ ТУТ: количество участников онлайн -->
+    <div class="online-pill">
+      <span class="online-dot"></span>
+      <strong>87</strong> участников онлайн
+    </div>
+
+    <!-- ПРАВЬ ТУТ: название сервера -->
+    <h1>130 <span class="grad">миллиметров</span></h1>
+
+    <!-- ПРАВЬ ТУТ: краткое описание сервера -->
+    <p class="lead">
+      Сервер для тех, кто любит игры и хорошую компанию.
+      Совместные сессии, голосовые чаты до утра и движ каждый день.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#join" class="btn btn-primary">💬 Присоединиться</a>
+      <a href="#about" class="btn btn-ghost">Узнать больше</a>
+    </div>
+
+    <!-- ПРАВЬ ТУТ: статистика сервера (data-target — конечное число для анимации) -->
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-num" data-target="540">0</span>
+        <span class="stat-label">участников</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-target="87">0</span>
+        <span class="stat-label">сейчас онлайн</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-target="12">0</span>
+        <span class="stat-label">голосовых каналов</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-target="2023" data-no-plus="1">0</span>
+        <span class="stat-label">год основания</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ====================== ФИШКИ СЕРВЕРА ====================== -->
+<section id="features">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <div class="section-tag">// что у нас</div>
+      <h2>Фишки сервера</h2>
+      <p>Несколько причин залететь и остаться</p>
+    </div>
+
+    <!-- ПРАВЬ ТУТ: карточки фишек сервера. Можно добавлять/удалять блоки -->
+    <div class="features-grid">
+
+      <div class="feature-card tilt">
+        <div class="feature-icon">🎮</div>
+        <h3>Совместные игры</h3>
+        <p>Регулярные сессии в Roblox, Minecraft и другие игры по вечерам и выходным.</p>
+      </div>
+
+      <div class="feature-card tilt">
+        <div class="feature-icon">🎙️</div>
+        <h3>Живые войсы</h3>
+        <p>Голосовые каналы редко пустеют — всегда найдётся компания для разговора.</p>
+      </div>
+
+      <div class="feature-card tilt">
+        <div class="feature-icon">🏆</div>
+        <h3>Турниры и события</h3>
+        <p>Периодические мини-турниры, конкурсы и активности с призами для участников.</p>
+      </div>
+
+      <div class="feature-card tilt">
+        <div class="feature-icon">🤝</div>
+        <h3>Дружелюбное сообщество</h3>
+        <p>Никакого токсика — модерация следит за атмосферой, новичков всегда встречают тепло.</p>
+      </div>
+
+      <div class="feature-card tilt">
+        <div class="feature-icon">🎨</div>
+        <h3>Творческий уголок</h3>
+        <p>Канал для своих артов, клипов, монтажей — делись тем, что создаёшь.</p>
+      </div>
+
+      <div class="feature-card tilt">
+        <div class="feature-icon">🔔</div>
+        <h3>Боты и утилиты</h3>
+        <p>Музыкальный бот, система уровней и роли по активности — здесь всё настроено с умом.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== О СЕРВЕРЕ ====================== -->
+<section id="about">
+  <div class="wrap reveal">
+    <div class="about-block">
+      <div>
+        <div class="section-tag">// о сервере</div>
+        <h2 style="margin:14px 0 18px;">Что внутри</h2>
+
+        <!-- ПРАВЬ ТУТ: текст о сервере -->
+        <p>
+          <strong>130 миллиметров</strong> — это сервер для геймеров и просто хороших людей.
+          Мы собрались, чтобы вместе играть, общаться и проводить время без напряга.
+        </p>
+        <p>
+          Здесь есть каналы под разные игры, отдельные войсы для тиммейтов и общий чат,
+          где никогда не бывает тихо. Заходи — освойся за пару минут.
+        </p>
+      </div>
+
+      <!-- ПРАВЬ ТУТ: список каналов сервера -->
+      <div class="tag-cloud">
+        <div class="channel-tag"><span class="hash">#</span>общий-чат</div>
+        <div class="channel-tag"><span class="hash">#</span>roblox</div>
+        <div class="channel-tag"><span class="hash">#</span>minecraft</div>
+        <div class="channel-tag"><span class="hash">#</span>мемы</div>
+        <div class="channel-tag"><span class="hash">#</span>творчество</div>
+        <div class="channel-tag"><span class="hash">#</span>объявления</div>
+        <div class="channel-tag"><span class="hash">#</span>поиск-тиммейтов</div>
+        <div class="channel-tag"><span class="hash">#</span>оффтоп</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ПРАВИЛА ====================== -->
+<section id="rules">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <div class="section-tag">// правила</div>
+      <h2>Уровни сервера</h2>
+      <p>Простые правила, чтобы всем было комфортно</p>
+    </div>
+
+    <!-- ПРАВЬ ТУТ: правила сервера. Число в rule-level — просто номер -->
+    <div class="rules-list">
+
+      <div class="rule-row">
+        <div class="rule-level">01</div>
+        <div class="rule-text">
+          <h3>Уважение к другим</h3>
+          <p>Никакого хейта, токсика и оскорблений. Мы тут отдыхаем, а не воюем.</p>
+        </div>
+      </div>
+
+      <div class="rule-row">
+        <div class="rule-level">02</div>
+        <div class="rule-text">
+          <h3>Без спама и рекламы</h3>
+          <p>Не закидывай чаты ссылками и рекламой без согласования с админами.</p>
+        </div>
+      </div>
+
+      <div class="rule-row">
+        <div class="rule-level">03</div>
+        <div class="rule-text">
+          <h3>Пиши в нужный канал</h3>
+          <p>Используй каналы по теме — это помогает держать сервер опрятным.</p>
+        </div>
+      </div>
+
+      <div class="rule-row">
+        <div class="rule-level">04</div>
+        <div class="rule-text">
+          <h3>18+ контент запрещён</h3>
+          <p>Сервер открыт для всех возрастов — следи за тем, что публикуешь.</p>
+        </div>
+      </div>
+
+      <div class="rule-row">
+        <div class="rule-level">05</div>
+        <div class="rule-text">
+          <h3>Слушай модераторов</h3>
+          <p>Решения команды модерации — финальные. Есть вопрос — пиши в тикет.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== КОМАНДА ====================== -->
+<section id="team">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <div class="section-tag">// команда</div>
+      <h2>Кто всё это держит</h2>
+      <p>Люди, к которым можно обратиться за помощью</p>
+    </div>
+
+    <!-- ПРАВЬ ТУТ: команда сервера. Цвет аватара меняй в style="background:..." -->
+    <div class="team-grid">
+
+      <div class="team-card">
+        <div class="team-avatar" style="background:#5865F2;">В</div>
+        <h3>Влад</h3>
+        <span class="team-role">Владелец</span>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar" style="background:#EB5FA8;">К</div>
+        <h3>Карина</h3>
+        <span class="team-role">Администратор</span>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar" style="background:#F2C94C;">Т</div>
+        <h3>Тимур</h3>
+        <span class="team-role">Модератор</span>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar" style="background:#3BA55D;">Е</div>
+        <h3>Ева</h3>
+        <span class="team-role">Модератор</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ОТЗЫВЫ ====================== -->
+<section id="reviews">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <div class="section-tag">// мнения</div>
+      <h2>Что говорят участники</h2>
+    </div>
+
+    <!-- ПРАВЬ ТУТ: отзывы участников сервера -->
+    <div class="reviews-grid">
+
+      <div class="review-card">
+        <p>"Залетел случайно, остался навсегда. Лучшее сообщество для совместных игр."</p>
+        <div class="review-author">
+          <div class="review-avatar">А</div>
+          <div>
+            <div class="review-name">Артём</div>
+            <div class="review-role">участник с 2023</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <p>"Войсы здесь живые в любое время суток. Нашёл кучу друзей именно тут."</p>
+        <div class="review-author">
+          <div class="review-avatar">М</div>
+          <div>
+            <div class="review-name">Максим</div>
+            <div class="review-role">участник с 2024</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <p>"Адекватная модерация и ноль токсика. Редкость для дискорд-серверов."</p>
+        <div class="review-author">
+          <div class="review-avatar">Д</div>
+          <div>
+            <div class="review-name">Дарья</div>
+            <div class="review-role">участник с 2024</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FAQ ====================== -->
+<section id="faq">
+  <div class="wrap reveal">
+    <div class="section-head">
+      <div class="section-tag">// вопросы</div>
+      <h2>Частые вопросы</h2>
+    </div>
+
+    <!-- ПРАВЬ ТУТ: вопросы и ответы. Кликаются и раскрываются сами -->
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-q">Сервер бесплатный?
+          <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Да, вступление и использование сервера полностью бесплатны.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Нужен ли микрофон, чтобы заходить в войсы?
+          <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Нет, можно просто слушать. Но с микрофоном веселее находить тиммейтов.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">С какого возраста можно вступить?
+          <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Сервер открыт для всех возрастов, но действуют правила Discord по возрастным ограничениям.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">Как стать модератором?
+          <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Будь активным, дружелюбным участником — администрация сама заметит и предложит роль.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ФИНАЛЬНЫЙ CTA ====================== -->
+<section id="join">
+  <div class="wrap reveal">
+    <div class="cta-block">
+      <h2>Заходи, у нас весело</h2>
+      <p>Один клик — и ты внутри. Места всем хватит.</p>
+      <!-- ПРАВЬ ТУТ: ссылка-приглашение на Discord-сервер -->
+      <a href="https://discord.gg/твоя-ссылка" class="btn btn-primary" style="font-size:1.05rem; padding:18px 38px;">
+        💬 Присоединиться к серверу
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 130 миллиметров — сделано на чистом HTML/CSS
+</footer>
+
+<script>
+  // --- Кастомный курсор ---
+  const dot = document.querySelector('.cursor-dot');
+  const ring = document.querySelector('.cursor-ring');
+  let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  function animateRing(){
+    ringX += (mouseX - ringX) * 0.18;
+    ringY += (mouseY - ringY) * 0.18;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button, .feature-card, .faq-q').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
+
+  // --- Плавающие частицы на фоне ---
+  const particlesContainer = document.getElementById('particles');
+  const particleCount = window.innerWidth < 700 ? 14 : 28;
+  for(let i=0; i<particleCount; i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const startX = Math.random() * 100;
+    const duration = 12 + Math.random() * 14;
+    const delay = Math.random() * 18;
+    const size = 2 + Math.random() * 3;
+    p.style.left = startX + 'vw';
+    p.style.bottom = '-10px';
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.animationDuration = duration + 's';
+    p.style.animationDelay = delay + 's';
+    if(Math.random() > 0.6) p.style.background = 'var(--gold)';
+    if(Math.random() > 0.8) p.style.background = 'var(--pink)';
+    particlesContainer.appendChild(p);
+  }
+
+  // --- Tilt-эффект для карточек фишек ---
+  document.querySelectorAll('.tilt').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const rotateX = ((y - cy) / cy) * -6;
+      const rotateY = ((x - cx) / cx) * 6;
+      card.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(700px) rotateX(0) rotateY(0) translateY(0)';
+    });
+  });
+
+  // --- Счётчики чисел при появлении ---
+  const counters = document.querySelectorAll('.stat-num');
+  let countersStarted = false;
+
+  function animateCounters(){
+    if(countersStarted) return;
+    countersStarted = true;
+    counters.forEach(el => {
+      const target = parseInt(el.getAttribute('data-target'), 10);
+      const noPlus = el.getAttribute('data-no-plus');
+      const duration = 1400;
+      const start = performance.now();
+      function tick(now){
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.floor(eased * target);
+        el.textContent = value + (progress === 1 && !noPlus ? '+' : '');
+        if(progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  const statsBar = document.querySelector('.stats-bar');
+  if(statsBar){
+    const statsObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting) animateCounters(); });
+    }, {threshold:0.4});
+    statsObs.observe(statsBar);
+  }
+
+  // --- FAQ аккордеон ---
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(other => {
+        if(other !== item){
+          other.classList.remove('open');
+          other.querySelector('.faq-a').style.maxHeight = null;
+        }
+      });
+      if(isOpen){
+        item.classList.remove('open');
+        a.style.maxHeight = null;
+      } else {
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // --- Scroll reveal ---
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        obs.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.1});
+  reveals.forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
