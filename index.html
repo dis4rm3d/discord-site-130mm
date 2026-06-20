@@ -160,6 +160,60 @@
     100%{ transform:translateY(-100vh) translateX(40px); opacity:0; }
   }
 
+  /* ---------- ИГРЫ СЕРВЕРА ---------- */
+  .games-grid{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:16px;
+  }
+  @media (max-width:900px){ .games-grid{ grid-template-columns:repeat(3, 1fr); } }
+  @media (max-width:500px){ .games-grid{ grid-template-columns:repeat(2, 1fr); } }
+  .game-card{
+    position:relative;
+    aspect-ratio:3/4;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    transition:transform 0.3s, border-color 0.3s;
+    cursor:pointer;
+  }
+  .game-card:hover{ transform:translateY(-6px) scale(1.03); border-color:var(--accent); }
+  .game-cover{
+    position:absolute; inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:2.2rem;
+  }
+  .game-card .game-name{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    padding:14px 10px 10px;
+    background:linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    font-size:0.78rem;
+    font-weight:600;
+    text-align:center;
+  }
+
+  /* ---------- ПОЛОСА ИКОНОК-ТЕГОВ (особенности) ---------- */
+  .vibe-row{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-top:20px;
+  }
+  .vibe-chip{
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    padding:10px 18px;
+    border-radius:30px;
+    font-size:0.88rem;
+    transition:border-color 0.2s, transform 0.2s;
+  }
+  .vibe-chip:hover{ border-color:var(--accent); transform:translateY(-2px); }
+
   /* ---------- ХЕДЕР ---------- */
   header{
     position:sticky; top:0; z-index:50;
@@ -526,6 +580,20 @@
     font-size:0.92rem;
   }
 
+  /* ---------- DISCORD WIDGET BLOCK ---------- */
+  .widget-block{
+    margin-top:46px;
+    display:flex;
+    justify-content:center;
+  }
+  .widget-frame-wrap{
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    box-shadow:0 20px 50px -20px rgba(88,101,242,0.35);
+  }
+  .widget-frame-wrap iframe{ display:block; }
+
   /* ---------- ФИНАЛЬНЫЙ CTA ---------- */
   .cta-block{
     text-align:center;
@@ -579,9 +647,7 @@
     </div>
     <div class="nav-links">
       <a href="#about">о сервере</a>
-      <a href="#features">фишки</a>
       <a href="#rules">правила</a>
-      <a href="#team">команда</a>
       <a href="#faq">вопросы</a>
     </div>
     <a href="#join" class="nav-cta">Войти на сервер</a>
@@ -595,7 +661,7 @@
     <!-- ПРАВЬ ТУТ: количество участников онлайн -->
     <div class="online-pill">
       <span class="online-dot"></span>
-      <strong>87</strong> участников онлайн
+      <strong id="liveOnline">—</strong> участников в сети
     </div>
 
     <!-- ПРАВЬ ТУТ: название сервера -->
@@ -604,7 +670,7 @@
     <!-- ПРАВЬ ТУТ: краткое описание сервера -->
     <p class="lead">
       Сервер для тех, кто любит игры и хорошую компанию.
-      Совместные сессии, голосовые чаты до утра каждый день.
+      Совместные сессии, голосовые чаты до утра и движ каждый день.
     </p>
 
     <div class="hero-actions">
@@ -612,22 +678,31 @@
       <a href="#about" class="btn btn-ghost">Узнать больше</a>
     </div>
 
+    <!-- ПРАВЬ ТУТ: особенности/вайб сервера -->
+    <div class="vibe-row">
+      <div class="vibe-chip">🏴‍☠️ Sea of Thieves</div>
+      <div class="vibe-chip">🔫 Counter-Strike 2</div>
+      <div class="vibe-chip">🎮 ROBLOX</div>
+      <div class="vibe-chip">⚔️ Dota 2</div>
+      <div class="vibe-chip">🌙 Valorant</div>
+    </div>
+
     <!-- ПРАВЬ ТУТ: статистика сервера (data-target — конечное число для анимации) -->
     <div class="stats-bar">
       <div class="stat">
-        <span class="stat-num" data-target="3">3</span>
+        <span class="stat-num" data-target="5" data-no-plus="1">0</span>
         <span class="stat-label">участников</span>
       </div>
       <div class="stat">
-        <span class="stat-num" data-target="1">1</span>
+        <span class="stat-num" id="liveOnlineStat" data-target="4" data-no-plus="1">0</span>
         <span class="stat-label">сейчас онлайн</span>
       </div>
       <div class="stat">
-        <span class="stat-num" data-target="0">0</span>
-        <span class="stat-label">голосовых каналов</span>
+        <span class="stat-num" id="liveVoiceStat" data-target="0" data-no-plus="1">0</span>
+        <span class="stat-label">сейчас в войсе</span>
       </div>
       <div class="stat">
-        <span class="stat-num" data-target="2020" data-no-plus="1">4</span>
+        <span class="stat-num" data-target="2024" data-no-plus="1">0</span>
         <span class="stat-label">год основания</span>
       </div>
     </div>
@@ -687,6 +762,8 @@
   </div>
 </section>
 
+
+
 <!-- ====================== О СЕРВЕРЕ ====================== -->
 <section id="about">
   <div class="wrap reveal">
@@ -697,12 +774,12 @@
 
         <!-- ПРАВЬ ТУТ: текст о сервере -->
         <p>
-          <strong>130 миллиметров</strong> — это сервер для геймеров и просто хороших людей.
+          <strong>130 миллиметров</strong> — небольшой, но дружный сервер для своих.
           Мы собрались, чтобы вместе играть, общаться и проводить время без напряга.
         </p>
         <p>
-          Здесь есть каналы под разные игры, отдельные войсы для тиммейтов и общий чат,
-          где никогда не бывает тихо. Заходи — освойся за пару минут.
+          Основан в июне 2024 года. Здесь есть каналы под разные игры, отдельные войсы
+          для тиммейтов и общий чат, где никогда не бывает тихо. Заходи — освойся за пару минут.
         </p>
       </div>
 
@@ -786,8 +863,8 @@
       <p>Люди, к которым можно обратиться за помощью</p>
     </div>
 
-    <!-- ПРАВЬ ТУТ: команда сервера. Цвет аватара меняй в style="background:..." -->
-    <div class="team-grid">
+    <!-- ПРАВЬ ТУТ: костяк сервера. Цвет аватара меняй в style="background:..." -->
+    <div class="team-grid" style="grid-template-columns:repeat(2,1fr); max-width:420px; margin:0 auto;">
 
       <div class="team-card">
         <div class="team-avatar" style="background:#5865F2;">В</div>
@@ -798,18 +875,6 @@
       <div class="team-card">
         <div class="team-avatar" style="background:#EB5FA8;">К</div>
         <h3>Карина</h3>
-        <span class="team-role">Администратор</span>
-      </div>
-
-      <div class="team-card">
-        <div class="team-avatar" style="background:#F2C94C;">Т</div>
-        <h3>Тимур</h3>
-        <span class="team-role">Модератор</span>
-      </div>
-
-      <div class="team-card">
-        <div class="team-avatar" style="background:#3BA55D;">Е</div>
-        <h3>Ева</h3>
         <span class="team-role">Модератор</span>
       </div>
 
@@ -918,6 +983,13 @@
       <a href="https://discord.gg/твоя-ссылка" class="btn btn-primary" style="font-size:1.05rem; padding:18px 38px;">
         💬 Присоединиться к серверу
       </a>
+
+      <!-- ПРАВЬ ТУТ: ID сервера тот же, что и в JS выше — менять не обязательно, подставится сам -->
+      <div class="widget-block">
+        <div class="widget-frame-wrap">
+          <iframe src="https://discord.com/widget?id=1246584119677419643&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -927,6 +999,43 @@
 </footer>
 
 <script>
+  // --- ЖИВАЯ СТАТИСТИКА DISCORD ---
+  // ПРАВЬ ТУТ: если поменяешь сервер, замени ID ниже на ID нового сервера
+  const DISCORD_GUILD_ID = '1246584119677419643';
+
+  async function fetchDiscordWidget(){
+    try{
+      const res = await fetch(`https://discord.com/api/guilds/${DISCORD_GUILD_ID}/widget.json`);
+      if(!res.ok) throw new Error('widget недоступен');
+      const data = await res.json();
+
+      const onlineCount = data.presence_count ?? 0;
+      // считаем тех, кто сидит в голосовых каналах (channels[].members)
+      let voiceCount = 0;
+      if(Array.isArray(data.members)){
+        voiceCount = data.members.filter(m => m.channel_id).length;
+      }
+
+      const liveOnlineEl = document.getElementById('liveOnline');
+      if(liveOnlineEl) liveOnlineEl.textContent = onlineCount;
+
+      const liveOnlineStat = document.getElementById('liveOnlineStat');
+      if(liveOnlineStat) liveOnlineStat.textContent = onlineCount;
+
+      const liveVoiceStat = document.getElementById('liveVoiceStat');
+      if(liveVoiceStat) liveVoiceStat.textContent = voiceCount;
+
+    } catch(err){
+      // если виджет недоступен (выключен в настройках сервера) — оставляем как было
+      console.warn('Discord widget: не удалось получить данные', err);
+      const liveOnlineEl = document.getElementById('liveOnline');
+      if(liveOnlineEl) liveOnlineEl.textContent = '?';
+    }
+  }
+
+  fetchDiscordWidget();
+  setInterval(fetchDiscordWidget, 30000); // обновление каждые 30 секунд
+
   // --- Кастомный курсор ---
   const dot = document.querySelector('.cursor-dot');
   const ring = document.querySelector('.cursor-ring');
@@ -991,7 +1100,7 @@
   });
 
   // --- Счётчики чисел при появлении ---
-  const counters = document.querySelectorAll('.stat-num');
+  const counters = document.querySelectorAll('.stat-num:not(#liveOnlineStat):not(#liveVoiceStat)');
   let countersStarted = false;
 
   function animateCounters(){
